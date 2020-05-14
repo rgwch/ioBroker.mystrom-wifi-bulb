@@ -5,9 +5,9 @@
 // The adapter-core module gives you access to the core ioBroker functions
 // you need to create an adapter
 import * as utils from "@iobroker/adapter-core";
+import fetch from "node-fetch"
 
-// Load your modules here, e.g.:
-// import * as fs from "fs";
+const API = "/api/v1/"
 
 type DeviceInfo = {
 
@@ -22,6 +22,19 @@ type DeviceInfo = {
   power: number;        // The power consumed by the bulb
   fw_version: string;   // The firmware version of the bulb
 
+}
+
+type GeneralInfo = {
+  version: string;      // Current firmware version
+  mac: string;          // MAC address, without any delimiters
+  type: string;         // The type of the queried device. See the type list below.
+  ssid: string;         // SSID of the currently connected network
+  ip: string;           // Current ip address
+  mask: string;         // Mask of the current network
+  gateway: string;      // Gateway of the current network
+  dns: string;          // DNS of the curent network
+  static: boolean;       // Wether or not the ip address is static
+  connected: boolean;   // Wether or not the device is connected to the internet
 }
 // Augment the adapter.config object with the actual types
 // TODO: delete this in the next version
@@ -52,23 +65,33 @@ class MystromWifiBulb extends utils.Adapter {
    */
   private async onReady(): Promise<void> {
 
+    this.setState("info.connection", false, true)
 
-    /*
-    For every state in the system there has to be also an object of type state
-    Here a simple template for a boolean variable named "testVariable"
-    Because every adapter instance uses its own unique namespace variable names can't collide with other adapters variables
-    */
-    await this.setObjectAsync("testVariable", {
-      type: "state",
-      common: {
-        name: "testVariable",
-        type: "boolean",
-        role: "indicator",
-        read: true,
-        write: true,
-      },
-      native: {},
-    });
+    const gi: GeneralInfo = await this.doFetch("info")
+    if (!gi) {
+      this.log.error("Could not connect to devcice")
+    } else {
+      await this.createObject("boolean", "on", true)
+      await this.createObject("string", "mode", true)
+      await this.createObject("string", "color", true)
+      await this.createObject("number", "ramp", true)
+      await this.createObject("number", "power", false)
+      this.setState("info.deviceInfo.mac", gi.mac)
+      this.setState("info.deviceInfo.details", JSON.stringify(gi))
+      const di: DeviceInfo = await this.doFetch("device")
+      if (!di) {
+        this.log.error("could not get devive info")
+      } else {
+        this.setState("on", di.on, true)
+        this.setState("mode", di.mode, true)
+        this.setState("color", di.color, true)
+        this.setState("ramp", di.ramp, true)
+        this.setState("power", di.power, true)
+        this.setState("info.connection", true, true)
+      }
+    }
+
+
 
     // in this template all states changes inside the adapters namespace are subscribed
     this.subscribeStates("*");
@@ -89,6 +112,45 @@ class MystromWifiBulb extends utils.Adapter {
 
   }
 
+
+  private async createObject(type: "string" | "boolean" | "number", name: string, writeable: boolean): Promise<void> {
+    await this.setObjectAsync(name, {
+      type: "state",
+      common: {
+        name,
+        type: type,
+        role: "indicator",
+        read: true,
+        write: writeable
+      },
+      native: {}
+    })
+  }
+
+  private async doFetch(addr: string): Promise<any> {
+    const url = this.config.url + API
+
+    this.log.info("Fetching " + url + addr)
+    try {
+      const response = await fetch(url + addr, { method: "get" })
+      if (response.status == 200) {
+        const result = await response.json()
+        this.log.info("got " + JSON.stringify(result))
+        return result
+
+      } else {
+        this.log.error("Error while fetching " + addr + ": " + response.status)
+        this.setState("info.connection", false, true);
+        return {}
+      }
+    } catch (err) {
+      this.log.error("Fatal error during fetch")
+      this.setState("info.connection", false, true);
+      return undefined
+    }
+  }
+
+
   /**
    * Is called when adapter shuts down - callback has to be called under any circumstances!
    */
@@ -101,7 +163,7 @@ class MystromWifiBulb extends utils.Adapter {
     }
   }
 
-  
+
   /**
    * Is called if a subscribed state changes
    */

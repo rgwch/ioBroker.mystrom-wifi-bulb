@@ -15,13 +15,13 @@ Object.defineProperty(exports, "__esModule", { value: true });
 // The adapter-core module gives you access to the core ioBroker functions
 // you need to create an adapter
 const utils = require("@iobroker/adapter-core");
+const node_fetch_1 = require("node-fetch");
+const API = "/api/v1/";
 class MystromWifiBulb extends utils.Adapter {
     constructor(options = {}) {
         super(Object.assign(Object.assign({}, options), { name: "mystrom-wifi-bulb" }));
         this.on("ready", this.onReady.bind(this));
-        this.on("objectChange", this.onObjectChange.bind(this));
         this.on("stateChange", this.onStateChange.bind(this));
-        // this.on("message", this.onMessage.bind(this));
         this.on("unload", this.onUnload.bind(this));
     }
     /**
@@ -29,27 +29,32 @@ class MystromWifiBulb extends utils.Adapter {
      */
     onReady() {
         return __awaiter(this, void 0, void 0, function* () {
-            // Initialize your adapter here
-            // The adapters config (in the instance object everything under the attribute "native") is accessible via
-            // this.config:
-            this.log.info("config option1: " + this.config.option1);
-            this.log.info("config option2: " + this.config.option2);
-            /*
-            For every state in the system there has to be also an object of type state
-            Here a simple template for a boolean variable named "testVariable"
-            Because every adapter instance uses its own unique namespace variable names can't collide with other adapters variables
-            */
-            yield this.setObjectAsync("testVariable", {
-                type: "state",
-                common: {
-                    name: "testVariable",
-                    type: "boolean",
-                    role: "indicator",
-                    read: true,
-                    write: true,
-                },
-                native: {},
-            });
+            this.setState("info.connection", false, true);
+            const gi = yield this.doFetch("info");
+            if (!gi) {
+                this.log.error("Could not connect to devcice");
+            }
+            else {
+                yield this.createObject("boolean", "on", true);
+                yield this.createObject("string", "mode", true);
+                yield this.createObject("string", "color", true);
+                yield this.createObject("number", "ramp", true);
+                yield this.createObject("number", "power", false);
+                this.setState("info.deviceInfo.mac", gi.mac);
+                this.setState("info.deviceInfo.details", JSON.stringify(gi));
+                const di = yield this.doFetch("device");
+                if (!di) {
+                    this.log.error("could not get devive info");
+                }
+                else {
+                    this.setState("on", di.on, true);
+                    this.setState("mode", di.mode, true);
+                    this.setState("color", di.color, true);
+                    this.setState("ramp", di.ramp, true);
+                    this.setState("power", di.power, true);
+                    this.setState("info.connection", true, true);
+                }
+            }
             // in this template all states changes inside the adapters namespace are subscribed
             this.subscribeStates("*");
             /*
@@ -63,11 +68,45 @@ class MystromWifiBulb extends utils.Adapter {
             yield this.setStateAsync("testVariable", { val: true, ack: true });
             // same thing, but the state is deleted after 30s (getState will return null afterwards)
             yield this.setStateAsync("testVariable", { val: true, ack: true, expire: 30 });
-            // examples for the checkPassword/checkGroup functions
-            let result = yield this.checkPasswordAsync("admin", "iobroker");
-            this.log.info("check user admin pw iobroker: " + result);
-            result = yield this.checkGroupAsync("admin", "admin");
-            this.log.info("check group user admin group admin: " + result);
+        });
+    }
+    createObject(type, name, writeable) {
+        return __awaiter(this, void 0, void 0, function* () {
+            yield this.setObjectAsync(name, {
+                type: "state",
+                common: {
+                    name,
+                    type: type,
+                    role: "indicator",
+                    read: true,
+                    write: writeable
+                },
+                native: {}
+            });
+        });
+    }
+    doFetch(addr) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const url = this.config.url + API;
+            this.log.info("Fetching " + url + addr);
+            try {
+                const response = yield node_fetch_1.default(url + addr, { method: "get" });
+                if (response.status == 200) {
+                    const result = yield response.json();
+                    this.log.info("got " + JSON.stringify(result));
+                    return result;
+                }
+                else {
+                    this.log.error("Error while fetching " + addr + ": " + response.status);
+                    this.setState("info.connection", false, true);
+                    return {};
+                }
+            }
+            catch (err) {
+                this.log.error("Fatal error during fetch");
+                this.setState("info.connection", false, true);
+                return undefined;
+            }
         });
     }
     /**
@@ -80,19 +119,6 @@ class MystromWifiBulb extends utils.Adapter {
         }
         catch (e) {
             callback();
-        }
-    }
-    /**
-     * Is called if a subscribed object changes
-     */
-    onObjectChange(id, obj) {
-        if (obj) {
-            // The object was changed
-            this.log.info(`object ${id} changed: ${JSON.stringify(obj)}`);
-        }
-        else {
-            // The object was deleted
-            this.log.info(`object ${id} deleted`);
         }
     }
     /**

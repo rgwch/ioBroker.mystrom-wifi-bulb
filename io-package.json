@@ -95,7 +95,7 @@
       "native": {}
     },
     {
-      "_id": "info:deviceInfo",
+      "_id": "info.deviceInfo",
       "type": "channel",
       "common": {
         "name": "Hardware Informationen"
