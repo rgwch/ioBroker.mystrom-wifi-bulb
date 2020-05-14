@@ -50,9 +50,9 @@
     "license": "MIT",
     "platform": "Javascript/Node.js",
     "main": "build/main.js",
-    "icon": "mystrom-wifi-bulb.png",
+    "icon": "mystrom-wifi-bulb.jpg",
     "enabled": true,
-    "extIcon": "https://raw.githubusercontent.com/rgwch/ioBroker.mystrom-wifi-bulb/master/admin/mystrom-wifi-bulb.png",
+    "extIcon": "https://raw.githubusercontent.com/rgwch/ioBroker.mystrom-wifi-bulb/master/admin/mystrom-wifi-bulb.jpg",
     "readme": "https://github.com/rgwch/ioBroker.mystrom-wifi-bulb/blob/master/README.md",
     "loglevel": "info",
     "mode": "daemon",
@@ -68,8 +68,8 @@
     ]
   },
   "native": {
-    "url": "string",
-    "hostip": "string"
+    "url": "",
+    "hostip": ""
   },
   "objects": [],
   "instanceObjects": [

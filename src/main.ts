@@ -49,7 +49,7 @@ declare global {
 }
 
 class MystromWifiBulb extends utils.Adapter {
-
+  private mac = ""
   public constructor(options: Partial<utils.AdapterOptions> = {}) {
     super({
       ...options,
@@ -77,6 +77,7 @@ class MystromWifiBulb extends utils.Adapter {
       await this.createObject("number", "ramp", true)
       await this.createObject("number", "power", false)
       this.setState("info.deviceInfo.mac", gi.mac)
+      this.mac = gi.mac
       this.setState("info.deviceInfo.details", JSON.stringify(gi))
       const di: DeviceInfo = await this.doFetch("device")
       if (!di) {
@@ -87,29 +88,27 @@ class MystromWifiBulb extends utils.Adapter {
         this.setState("color", di.color, true)
         this.setState("ramp", di.ramp, true)
         this.setState("power", di.power, true)
+        if (this.config.hostip) {
+          await this.doPost({ notifyurl: this.config.hostip })
+        }
         this.setState("info.connection", true, true)
       }
     }
 
-
-
-    // in this template all states changes inside the adapters namespace are subscribed
     this.subscribeStates("*");
+  }
 
-    /*
-    setState examples
-    you will notice that each setState will cause the stateChange event to fire (because of above subscribeStates cmd)
-    */
-    // the variable testVariable is set to true as command (ack=false)
-    await this.setStateAsync("testVariable", true);
-
-    // same thing, but the value is flagged "ack"
-    // ack should be always set to true if the value is received from or acknowledged from the target system
-    await this.setStateAsync("testVariable", { val: true, ack: true });
-
-    // same thing, but the state is deleted after 30s (getState will return null afterwards)
-    await this.setStateAsync("testVariable", { val: true, ack: true, expire: 30 });
-
+  /**
+  * Is called if a subscribed state changes
+  */
+  private onStateChange(id: string, state: ioBroker.State | null | undefined): void {
+    if (state) {
+      // The state was changed
+      this.log.info(`state ${id} changed: ${state.val} (ack = ${state.ack})`);
+    } else {
+      // The state was deleted
+      this.log.info(`state ${id} deleted`);
+    }
   }
 
 
@@ -125,6 +124,30 @@ class MystromWifiBulb extends utils.Adapter {
       },
       native: {}
     })
+  }
+
+  private async doPost(body: any): Promise<any> {
+    const url = this.config.url + API + "device/" + this.mac
+    this.log.info("POSTing " + url + JSON.stringify(body))
+    const encoded = new URLSearchParams()
+    Object.keys(body).forEach(element => {
+      encoded.append(element, body[element])
+    });
+    try {
+      const response = await fetch(url, {
+        method: "POST",
+        body: encoded,
+        redirect: "follow"
+      })
+      if (response.status !== 200) {
+        this.log.error("Error with POST: " + response.status + ", " + response.statusText)
+      } else {
+        const result = await response.json()
+        return result
+      }
+    } catch (err) {
+      this.log.error("Exception with POST " + err)
+    }
   }
 
   private async doFetch(addr: string): Promise<any> {
@@ -164,18 +187,6 @@ class MystromWifiBulb extends utils.Adapter {
   }
 
 
-  /**
-   * Is called if a subscribed state changes
-   */
-  private onStateChange(id: string, state: ioBroker.State | null | undefined): void {
-    if (state) {
-      // The state was changed
-      this.log.info(`state ${id} changed: ${state.val} (ack = ${state.ack})`);
-    } else {
-      // The state was deleted
-      this.log.info(`state ${id} deleted`);
-    }
-  }
 
 }
 

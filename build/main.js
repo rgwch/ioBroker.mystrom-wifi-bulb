@@ -20,6 +20,7 @@ const API = "/api/v1/";
 class MystromWifiBulb extends utils.Adapter {
     constructor(options = {}) {
         super(Object.assign(Object.assign({}, options), { name: "mystrom-wifi-bulb" }));
+        this.mac = "";
         this.on("ready", this.onReady.bind(this));
         this.on("stateChange", this.onStateChange.bind(this));
         this.on("unload", this.onUnload.bind(this));
@@ -41,6 +42,7 @@ class MystromWifiBulb extends utils.Adapter {
                 yield this.createObject("number", "ramp", true);
                 yield this.createObject("number", "power", false);
                 this.setState("info.deviceInfo.mac", gi.mac);
+                this.mac = gi.mac;
                 this.setState("info.deviceInfo.details", JSON.stringify(gi));
                 const di = yield this.doFetch("device");
                 if (!di) {
@@ -52,23 +54,27 @@ class MystromWifiBulb extends utils.Adapter {
                     this.setState("color", di.color, true);
                     this.setState("ramp", di.ramp, true);
                     this.setState("power", di.power, true);
+                    if (this.config.hostip) {
+                        yield this.doPost({ notifyurl: this.config.hostip });
+                    }
                     this.setState("info.connection", true, true);
                 }
             }
-            // in this template all states changes inside the adapters namespace are subscribed
             this.subscribeStates("*");
-            /*
-            setState examples
-            you will notice that each setState will cause the stateChange event to fire (because of above subscribeStates cmd)
-            */
-            // the variable testVariable is set to true as command (ack=false)
-            yield this.setStateAsync("testVariable", true);
-            // same thing, but the value is flagged "ack"
-            // ack should be always set to true if the value is received from or acknowledged from the target system
-            yield this.setStateAsync("testVariable", { val: true, ack: true });
-            // same thing, but the state is deleted after 30s (getState will return null afterwards)
-            yield this.setStateAsync("testVariable", { val: true, ack: true, expire: 30 });
         });
+    }
+    /**
+    * Is called if a subscribed state changes
+    */
+    onStateChange(id, state) {
+        if (state) {
+            // The state was changed
+            this.log.info(`state ${id} changed: ${state.val} (ack = ${state.ack})`);
+        }
+        else {
+            // The state was deleted
+            this.log.info(`state ${id} deleted`);
+        }
     }
     createObject(type, name, writeable) {
         return __awaiter(this, void 0, void 0, function* () {
@@ -83,6 +89,33 @@ class MystromWifiBulb extends utils.Adapter {
                 },
                 native: {}
             });
+        });
+    }
+    doPost(body) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const url = this.config.url + API + "device/" + this.mac;
+            this.log.info("POSTing " + url + JSON.stringify(body));
+            const encoded = new URLSearchParams();
+            Object.keys(body).forEach(element => {
+                encoded.append(element, body[element]);
+            });
+            try {
+                const response = yield node_fetch_1.default(url, {
+                    method: "POST",
+                    body: encoded,
+                    redirect: "follow"
+                });
+                if (response.status !== 200) {
+                    this.log.error("Error with POST: " + response.status + ", " + response.statusText);
+                }
+                else {
+                    const result = yield response.json();
+                    return result;
+                }
+            }
+            catch (err) {
+                this.log.error("Exception with POST " + err);
+            }
         });
     }
     doFetch(addr) {
@@ -119,19 +152,6 @@ class MystromWifiBulb extends utils.Adapter {
         }
         catch (e) {
             callback();
-        }
-    }
-    /**
-     * Is called if a subscribed state changes
-     */
-    onStateChange(id, state) {
-        if (state) {
-            // The state was changed
-            this.log.info(`state ${id} changed: ${state.val} (ack = ${state.ack})`);
-        }
-        else {
-            // The state was deleted
-            this.log.info(`state ${id} deleted`);
         }
     }
 }
