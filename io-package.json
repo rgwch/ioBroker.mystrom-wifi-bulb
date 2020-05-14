@@ -1,0 +1,130 @@
+{
+  "common": {
+    "name": "mystrom-wifi-bulb",
+    "version": "0.0.1",
+    "news": {
+      "0.0.1": {
+        "en": "initial release",
+        "de": "Erstveröffentlichung",
+        "ru": "Начальная версия",
+        "pt": "lançamento inicial",
+        "nl": "Eerste uitgave",
+        "fr": "Première version",
+        "it": "Versione iniziale",
+        "es": "Versión inicial",
+        "pl": "Pierwsze wydanie",
+        "zh-cn": "首次出版"
+      }
+    },
+    "title": "MyStrom WiFi Bulb",
+    "titleLang": {
+      "en": "MyStrom WiFi Bulb",
+      "de": "MyStrom WiFi Bulb",
+      "ru": "MyStrom WiFi Bulb",
+      "pt": "MyStrom WiFi Bulb",
+      "nl": "MyStrom WiFi-lamp",
+      "fr": "Ampoule WiFi MyStrom",
+      "it": "Lampadina WiFi MyStrom",
+      "es": "Bombilla WiFi MyStrom",
+      "pl": "MyStrom WiFi Bulb",
+      "zh-cn": "MyStrom WiFi灯泡"
+    },
+    "desc": {
+      "en": "Control Mystrom lights",
+      "de": "Kontrollieren Sie Mystrom-Lichter",
+      "ru": "Контрольные огни Mystrom",
+      "pt": "Luzes de controle Mystrom",
+      "nl": "Bedien Mystrom-lampen",
+      "fr": "Contrôler les lumières Mystrom",
+      "it": "Controlla le luci di Mystrom",
+      "es": "Control de luces Mystrom",
+      "pl": "Kontroluj światła Mystrom",
+      "zh-cn": "控制Mystrom灯"
+    },
+    "authors": [
+      "rgwch <rgw@rgw.ch>"
+    ],
+    "keywords": [
+      "mystrom"
+    ],
+    "license": "MIT",
+    "platform": "Javascript/Node.js",
+    "main": "build/main.js",
+    "icon": "mystrom-wifi-bulb.png",
+    "enabled": true,
+    "extIcon": "https://raw.githubusercontent.com/rgwch/ioBroker.mystrom-wifi-bulb/master/admin/mystrom-wifi-bulb.png",
+    "readme": "https://github.com/rgwch/ioBroker.mystrom-wifi-bulb/blob/master/README.md",
+    "loglevel": "info",
+    "mode": "daemon",
+    "type": "lighting",
+    "compact": true,
+    "connectionType": "local",
+    "dataSource": "push",
+    "materialize": true,
+    "dependencies": [
+      {
+        "js-controller": ">=1.4.2"
+      }
+    ]
+  },
+  "native": {
+    "url": "string",
+    "hostip": "string"
+  },
+  "objects": [],
+  "instanceObjects": [
+    {
+      "_id": "info",
+      "type": "channel",
+      "common": {
+        "name": "Information"
+      },
+      "native": {}
+    },
+    {
+      "_id": "info.connection",
+      "type": "state",
+      "common": {
+        "role": "indicator.connected",
+        "name": "Device or service connected",
+        "type": "boolean",
+        "read": true,
+        "write": false,
+        "def": false
+      },
+      "native": {}
+    },
+    {
+      "_id": "info:deviceInfo",
+      "type": "channel",
+      "common": {
+        "name": "Hardware Informationen"
+      },
+      "native": {}
+    },
+    {
+      "_id": "info.deviceInfo.mac",
+      "type": "state",
+      "common": {
+        "role": "state",
+        "name": "mac",
+        "type": "string",
+        "read": true,
+        "write": false
+      },
+      "native": {}
+    },
+    {
+      "_id": "info.deviceInfo.details",
+      "type": "state",
+      "common": {
+        "role": "json",
+        "type": "string",
+        "name": "Detailed informations",
+        "read": true,
+        "write": false
+      },
+      "native": {}
+    }
+  ]
+}
