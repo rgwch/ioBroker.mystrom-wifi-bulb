@@ -43,9 +43,7 @@ class MystromWifiBulb extends utils.Adapter {
       name: "mystrom-wifi-bulb",
     });
     this.on("ready", this.onReady.bind(this));
-    this.on("objectChange", this.onObjectChange.bind(this));
     this.on("stateChange", this.onStateChange.bind(this));
-    // this.on("message", this.onMessage.bind(this));
     this.on("unload", this.onUnload.bind(this));
   }
 
@@ -53,12 +51,7 @@ class MystromWifiBulb extends utils.Adapter {
    * Is called when databases are connected and adapter received configuration.
    */
   private async onReady(): Promise<void> {
-    // Initialize your adapter here
 
-    // The adapters config (in the instance object everything under the attribute "native") is accessible via
-    // this.config:
-    this.log.info("config option1: " + this.config.option1);
-    this.log.info("config option2: " + this.config.option2);
 
     /*
     For every state in the system there has to be also an object of type state
@@ -94,12 +87,6 @@ class MystromWifiBulb extends utils.Adapter {
     // same thing, but the state is deleted after 30s (getState will return null afterwards)
     await this.setStateAsync("testVariable", { val: true, ack: true, expire: 30 });
 
-    // examples for the checkPassword/checkGroup functions
-    let result = await this.checkPasswordAsync("admin", "iobroker");
-    this.log.info("check user admin pw iobroker: " + result);
-
-    result = await this.checkGroupAsync("admin", "admin");
-    this.log.info("check group user admin group admin: " + result);
   }
 
   /**
@@ -114,19 +101,7 @@ class MystromWifiBulb extends utils.Adapter {
     }
   }
 
-  /**
-   * Is called if a subscribed object changes
-   */
-  private onObjectChange(id: string, obj: ioBroker.Object | null | undefined): void {
-    if (obj) {
-      // The object was changed
-      this.log.info(`object ${id} changed: ${JSON.stringify(obj)}`);
-    } else {
-      // The object was deleted
-      this.log.info(`object ${id} deleted`);
-    }
-  }
-
+  
   /**
    * Is called if a subscribed state changes
    */
@@ -139,22 +114,6 @@ class MystromWifiBulb extends utils.Adapter {
       this.log.info(`state ${id} deleted`);
     }
   }
-
-  // /**
-  //  * Some message was sent to this instance over message box. Used by email, pushover, text2speech, ...
-  //  * Using this method requires "common.message" property to be set to true in io-package.json
-  //  */
-  // private onMessage(obj: ioBroker.Message): void {
-  // 	if (typeof obj === "object" && obj.message) {
-  // 		if (obj.command === "send") {
-  // 			// e.g. send email or pushover or whatever
-  // 			this.log.info("send command");
-
-  // 			// Send response in callback if required
-  // 			if (obj.callback) this.sendTo(obj.from, obj.command, "Message received", obj.callback);
-  // 		}
-  // 	}
-  // }
 
 }
 
