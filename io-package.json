@@ -1,7 +1,7 @@
 {
   "common": {
     "name": "mystrom-wifi-bulb",
-    "version": "0.0.1",
+    "version": "0.1.0",
     "news": {
       "0.0.1": {
         "en": "initial release",
@@ -30,8 +30,8 @@
       "zh-cn": "MyStrom WiFi灯泡"
     },
     "desc": {
-      "en": "Control Mystrom lights",
-      "de": "Kontrollieren Sie Mystrom-Lichter",
+      "en": "Control MyStrom bulbs",
+      "de": "MyStrom Lampen steuern",
       "ru": "Контрольные огни Mystrom",
       "pt": "Luzes de controle Mystrom",
       "nl": "Bedien Mystrom-lampen",
