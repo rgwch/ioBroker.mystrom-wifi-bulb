@@ -76,20 +76,23 @@ class MystromWifiBulb extends utils.Adapter {
       await this.createObject("string", "color", true)
       await this.createObject("number", "ramp", true)
       await this.createObject("number", "power", false)
+      await this.createObject("string","notify",false)
       this.setState("info.deviceInfo.mac", gi.mac)
       this.mac = gi.mac
       this.setState("info.deviceInfo.details", JSON.stringify(gi))
-      const di: DeviceInfo = await this.doFetch("device")
-      if (!di) {
-        this.log.error("could not get devive info")
+      const dir = await this.doFetch("device")
+      if (!dir) {
+        this.log.error("could not get device info")
       } else {
+        const di: DeviceInfo=dir[this.mac]
+        this.log.info("Setting mode "+di.mode)
         this.setState("on", di.on, true)
         this.setState("mode", di.mode, true)
         this.setState("color", di.color, true)
         this.setState("ramp", di.ramp, true)
         this.setState("power", di.power, true)
         if (this.config.hostip) {
-          await this.doPost({ notifyurl: this.config.hostip })
+          await this.doPost({ notifyurl: this.config.hostip+`/${this.name}.${this.instance}.notify` })
         }
         this.setState("info.connection", true, true)
       }
@@ -105,6 +108,10 @@ class MystromWifiBulb extends utils.Adapter {
     if (state) {
       // The state was changed
       this.log.info(`state ${id} changed: ${state.val} (ack = ${state.ack})`);
+      if(!state.ack){
+        
+
+      }
     } else {
       // The state was deleted
       this.log.info(`state ${id} deleted`);
@@ -143,6 +150,7 @@ class MystromWifiBulb extends utils.Adapter {
         this.log.error("Error with POST: " + response.status + ", " + response.statusText)
       } else {
         const result = await response.json()
+        this.log.info(JSON.stringify(result))
         return result
       }
     } catch (err) {

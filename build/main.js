@@ -41,21 +41,24 @@ class MystromWifiBulb extends utils.Adapter {
                 yield this.createObject("string", "color", true);
                 yield this.createObject("number", "ramp", true);
                 yield this.createObject("number", "power", false);
+                yield this.createObject("string", "notify", false);
                 this.setState("info.deviceInfo.mac", gi.mac);
                 this.mac = gi.mac;
                 this.setState("info.deviceInfo.details", JSON.stringify(gi));
-                const di = yield this.doFetch("device");
-                if (!di) {
-                    this.log.error("could not get devive info");
+                const dir = yield this.doFetch("device");
+                if (!dir) {
+                    this.log.error("could not get device info");
                 }
                 else {
+                    const di = dir[this.mac];
+                    this.log.info("Setting mode " + di.mode);
                     this.setState("on", di.on, true);
                     this.setState("mode", di.mode, true);
                     this.setState("color", di.color, true);
                     this.setState("ramp", di.ramp, true);
                     this.setState("power", di.power, true);
                     if (this.config.hostip) {
-                        yield this.doPost({ notifyurl: this.config.hostip });
+                        yield this.doPost({ notifyurl: this.config.hostip + `/${this.name}.${this.instance}.notify` });
                     }
                     this.setState("info.connection", true, true);
                 }
@@ -70,6 +73,8 @@ class MystromWifiBulb extends utils.Adapter {
         if (state) {
             // The state was changed
             this.log.info(`state ${id} changed: ${state.val} (ack = ${state.ack})`);
+            if (!state.ack) {
+            }
         }
         else {
             // The state was deleted
@@ -110,6 +115,7 @@ class MystromWifiBulb extends utils.Adapter {
                 }
                 else {
                     const result = yield response.json();
+                    this.log.info(JSON.stringify(result));
                     return result;
                 }
             }
