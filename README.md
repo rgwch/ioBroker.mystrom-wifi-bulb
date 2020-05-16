@@ -2,17 +2,58 @@
 # ioBroker.mystrom-wifi-bulb
 
 [![NPM version](http://img.shields.io/npm/v/iobroker.mystrom-wifi-bulb.svg)](https://www.npmjs.com/package/iobroker.mystrom-wifi-bulb)
-[![Downloads](https://img.shields.io/npm/dm/iobroker.mystrom-wifi-bulb.svg)](https://www.npmjs.com/package/iobroker.mystrom-wifi-bulb)
-![Number of Installations (latest)](http://iobroker.live/badges/mystrom-wifi-bulb-installed.svg)
-![Number of Installations (stable)](http://iobroker.live/badges/mystrom-wifi-bulb-stable.svg)
-[![Dependency Status](https://img.shields.io/david/rgwch/iobroker.mystrom-wifi-bulb.svg)](https://david-dm.org/rgwch/iobroker.mystrom-wifi-bulb)
-[![Known Vulnerabilities](https://snyk.io/test/github/rgwch/ioBroker.mystrom-wifi-bulb/badge.svg)](https://snyk.io/test/github/rgwch/ioBroker.mystrom-wifi-bulb)
-
-[![NPM](https://nodei.co/npm/iobroker.mystrom-wifi-bulb.png?downloads=true)](https://nodei.co/npm/iobroker.mystrom-wifi-bulb/)
 
 ## What it is
 
-This is an adaptor to connect [MyStrom Wifi Bulbs]() with the [ioBroker]() home automation system.
+This is an adaptor to connect [MyStrom Wifi Bulbs](https://mystrom.ch/de/wifi-bulb/) with the [ioBroker](https://www.iobroker.net) home automation system. These are light bulbs with an integrated webserver and a [REST-API](http://api.mystrom.ch) to program colors, brightness, and turn on and off.
+ 
+## Hardware installation
+
+When first switched on, the bulb goes in WPS mode for 3 minutes. If you aktvate your router's WPS within this time span, the bulb will appear in the router's client list.
+
+## Software Installation
+
+### Prerequisites
+
+- A working instance of [ioBroker](http://www.iobroker.net). If you only want a quick test-install, I recommend using [docker](https://www.docker.com/):  
+`docker run -p 8081:8081 -p 8087:8087 -p 8082:8082 -p 9004:9004 --name iobroker -v iobrokerdata:/opt/iobroker buanet/iobroker:latest` (note that you need an otherwise unused port for this mystrom-wifi-bulb adapter, here arbitrarly 9004)
+
+- The MyStrom-Wifi-Bulb should already be active and integrated in the Network. If you have more than one bulb, you need an instance of the adapter for each of them.
+
+### Fetch and install ioBroker.mystrom-wifi-button
+
+This adapter is not part of the official ioBroker distribution. So it will not show up in ioBroker admin's adapter list. You can install it either directly from NPM:
+
+[![NPM](https://nodei.co/npm/iobroker.mystrom-wifi-bulb.png)](https://nodei.co/npm/iobroker.mystrom-wifi-bulb/)
+
+or as a custom adapter from the admin-ui:
+
+![](doc/bulb_1.jpg)
+
+Make sure to select "Beliebig" even though it's situated on Github:
+
+![](doc/bulb_2.jpg)
+
+Find out the release you're interessed in: <https://github.com/rgwch/ioBroker.mystrom-wifi-bulb/releases> and copy/paste the address of the .tar.gz link.
+
+Read the warning and click "install" if you agree.
+
+The adapter should then be in the admin pages's list:
+
+![](doc/bulb_3.jpg)
+
+Click on the three dots near the right upper corner and then on the **+** sign in the lower left corner to create a new instance. You need a separate instance for each MyStrom Wifi Bulb in your Home.
+
+The configuration dialog should open after successful creation of the instance. 
+
+![](doc/bulb_4.jpg)
+
+Insert the IP Address of the bulb on the left side. Since the bulb need a callback to notify about changes, the IP Address of the ioBroker instance with this adapter must be inserted on the right. The port number is at will, only it must not be used by another service. Here we chose 9004. (If the docker instance runs inside docker, make sure that the port is propagated to the outside, as in the example above)
+
+After clicking save and close, the instance should appear and turn "green".
+
+## Use
+
 
 ## mystrom-wifi-bulb adapter for ioBroker
 

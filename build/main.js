@@ -85,12 +85,9 @@ class MystromWifiBulb extends utils.Adapter {
         return __awaiter(this, void 0, void 0, function* () {
             const vl = act[statename];
             const full = this.namespace + "." + statename;
-            this.log.info("checking " + full + "=> " + vl);
             const old = yield this.getStateAsync(full);
             if (old && old.val) {
-                this.log.info("old " + statename + ": " + old.val);
                 if (old.val != vl) {
-                    this.log.info(old.val + "is not equal " + vl);
                     yield this.setStateAsync(full, vl, true);
                 }
             }
@@ -114,6 +111,12 @@ class MystromWifiBulb extends utils.Adapter {
             // The state was changed
             this.log.info(`state ${id} changed: ${state.val} (ack = ${state.ack})`);
             if (!state.ack) {
+                if (id.endsWith(".on")) {
+                    this.doPost({ action: (state.val ? "on" : "off") });
+                }
+                else {
+                    this.doPost({ [id.substr(this.namespace.length)]: state.val });
+                }
             }
         }
         else {
