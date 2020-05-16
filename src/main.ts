@@ -11,16 +11,16 @@ const API = "/api/v1/"
 
 type DeviceInfo = {
 
-  type: string;         // The type of the device
-  battery: boolean;     // Wether or not the devices is using batteries
-  reachable: boolean;   // Wether or not the device is connected to a myStrom account
-  meshroot: boolean;    // DEPRECATED
-  on: boolean;          // Wether or not the bulb is currently turned on
-  color: string;        // The current color
-  mode: "rgb" | "hsv";  // The color mode the bulb is currently set to
-  ramp: number;         // How quickly the bulb changes its its color
-  power: number;        // The power consumed by the bulb
-  fw_version: string;   // The firmware version of the bulb
+  type: string;                   // The type of the device
+  battery: boolean;               // Wether or not the devices is using batteries
+  reachable: boolean;             // Wether or not the device is connected to a myStrom account
+  meshroot: boolean;              // DEPRECATED
+  on: boolean;                    // Wether or not the bulb is currently turned on
+  color: string;                  // The current color
+  mode: "rgb" | "hsv" | "mono";   // The color mode the bulb is currently set to
+  ramp: number;                   // How quickly the bulb changes its its color
+  power: number;                  // The power consumed by the bulb
+  fw_version: string;             // The firmware version of the bulb
 
 }
 
@@ -71,12 +71,15 @@ class MystromWifiBulb extends utils.Adapter {
     if (!gi) {
       this.log.error("Could not connect to devcice")
     } else {
+      if (gi.type != "102") {
+        this.log.warn("unsupported device type " + gi.type)
+      }
       await this.createObject("boolean", "on", true)
       await this.createObject("string", "mode", true)
       await this.createObject("string", "color", true)
       await this.createObject("number", "ramp", true)
       await this.createObject("number", "power", false)
-      await this.createObject("string","notify",false)
+      await this.createObject("boolean", "notify", false)
       this.setState("info.deviceInfo.mac", gi.mac)
       this.mac = gi.mac
       this.setState("info.deviceInfo.details", JSON.stringify(gi))
@@ -84,15 +87,17 @@ class MystromWifiBulb extends utils.Adapter {
       if (!dir) {
         this.log.error("could not get device info")
       } else {
-        const di: DeviceInfo=dir[this.mac]
-        this.log.info("Setting mode "+di.mode)
+        const di: DeviceInfo = dir[this.mac]
+        if (di.type !== "rgblamp") {
+          this.log.warn("unsupported device type " + di.type)
+        }
         this.setState("on", di.on, true)
         this.setState("mode", di.mode, true)
         this.setState("color", di.color, true)
         this.setState("ramp", di.ramp, true)
         this.setState("power", di.power, true)
         if (this.config.hostip) {
-          await this.doPost({ notifyurl: this.config.hostip+`/${this.name}.${this.instance}.notify` })
+          await this.doPost({ notifyurl: this.config.hostip + `/set/${this.name}.${this.instance}.notify?value%3Dtrue` })
         }
         this.setState("info.connection", true, true)
       }
@@ -108,8 +113,8 @@ class MystromWifiBulb extends utils.Adapter {
     if (state) {
       // The state was changed
       this.log.info(`state ${id} changed: ${state.val} (ack = ${state.ack})`);
-      if(!state.ack){
-        
+      if (!state.ack) {
+
 
       }
     } else {
@@ -135,15 +140,25 @@ class MystromWifiBulb extends utils.Adapter {
 
   private async doPost(body: any): Promise<any> {
     const url = this.config.url + API + "device/" + this.mac
-    this.log.info("POSTing " + url + JSON.stringify(body))
+    /*
     const encoded = new URLSearchParams()
     Object.keys(body).forEach(element => {
       encoded.append(element, body[element])
     });
+    */
+    let enc = ""
+    Object.keys(body).forEach(el => {
+      enc += `${el}=${body[el]}&`
+    })
+    this.log.info("POSTing " + url + ":" + enc.substr(0, enc.length - 1))
+
     try {
       const response = await fetch(url, {
         method: "POST",
-        body: encoded,
+        headers: {
+          "content-type": "application/x-www-form-urlencoded"
+        },
+        body: enc.substr(0, enc.length - 1),
         redirect: "follow"
       })
       if (response.status !== 200) {

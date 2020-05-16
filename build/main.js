@@ -36,12 +36,15 @@ class MystromWifiBulb extends utils.Adapter {
                 this.log.error("Could not connect to devcice");
             }
             else {
+                if (gi.type != "102") {
+                    this.log.warn("unsupported device type " + gi.type);
+                }
                 yield this.createObject("boolean", "on", true);
                 yield this.createObject("string", "mode", true);
                 yield this.createObject("string", "color", true);
                 yield this.createObject("number", "ramp", true);
                 yield this.createObject("number", "power", false);
-                yield this.createObject("string", "notify", false);
+                yield this.createObject("boolean", "notify", false);
                 this.setState("info.deviceInfo.mac", gi.mac);
                 this.mac = gi.mac;
                 this.setState("info.deviceInfo.details", JSON.stringify(gi));
@@ -51,14 +54,16 @@ class MystromWifiBulb extends utils.Adapter {
                 }
                 else {
                     const di = dir[this.mac];
-                    this.log.info("Setting mode " + di.mode);
+                    if (di.type !== "rgblamp") {
+                        this.log.warn("unsupported device type " + di.type);
+                    }
                     this.setState("on", di.on, true);
                     this.setState("mode", di.mode, true);
                     this.setState("color", di.color, true);
                     this.setState("ramp", di.ramp, true);
                     this.setState("power", di.power, true);
                     if (this.config.hostip) {
-                        yield this.doPost({ notifyurl: this.config.hostip + `/${this.name}.${this.instance}.notify` });
+                        yield this.doPost({ notifyurl: this.config.hostip + `/set/${this.name}.${this.instance}.notify?value%3Dtrue` });
                     }
                     this.setState("info.connection", true, true);
                 }
@@ -99,15 +104,24 @@ class MystromWifiBulb extends utils.Adapter {
     doPost(body) {
         return __awaiter(this, void 0, void 0, function* () {
             const url = this.config.url + API + "device/" + this.mac;
-            this.log.info("POSTing " + url + JSON.stringify(body));
-            const encoded = new URLSearchParams();
+            /*
+            const encoded = new URLSearchParams()
             Object.keys(body).forEach(element => {
-                encoded.append(element, body[element]);
+              encoded.append(element, body[element])
             });
+            */
+            let enc = "";
+            Object.keys(body).forEach(el => {
+                enc += `${el}=${body[el]}&`;
+            });
+            this.log.info("POSTing " + url + ":" + enc.substr(0, enc.length - 1));
             try {
                 const response = yield node_fetch_1.default(url, {
                     method: "POST",
-                    body: encoded,
+                    headers: {
+                        "content-type": "application/x-www-form-urlencoded"
+                    },
+                    body: enc.substr(0, enc.length - 1),
                     redirect: "follow"
                 });
                 if (response.status !== 200) {
