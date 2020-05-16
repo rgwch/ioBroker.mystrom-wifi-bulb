@@ -16,11 +16,13 @@ Object.defineProperty(exports, "__esModule", { value: true });
 // you need to create an adapter
 const utils = require("@iobroker/adapter-core");
 const node_fetch_1 = require("node-fetch");
+const listener_1 = require("./listener");
 const API = "/api/v1/";
 class MystromWifiBulb extends utils.Adapter {
     constructor(options = {}) {
         super(Object.assign(Object.assign({}, options), { name: "mystrom-wifi-bulb" }));
         this.mac = "";
+        this.listener = new listener_1.BulbListener(this.notify);
         this.on("ready", this.onReady.bind(this));
         this.on("stateChange", this.onStateChange.bind(this));
         this.on("unload", this.onUnload.bind(this));
@@ -65,11 +67,23 @@ class MystromWifiBulb extends utils.Adapter {
                     if (this.config.hostip) {
                         yield this.doPost({ notifyurl: this.config.hostip + `/set/${this.name}.${this.instance}.notify?value%3Dtrue` });
                     }
+                    const listenerdef = this.config.hostip.split(":");
+                    if (listenerdef.length == 2) {
+                        const listenerPort = parseInt(listenerdef[1].trim());
+                        this.listener.start(listenerPort);
+                    }
                     this.setState("info.connection", true, true);
                 }
             }
             this.subscribeStates("*");
         });
+    }
+    notify(data) {
+        this.setState("on", data.on, true);
+        this.setState("color", data.color, true);
+        this.setState("mode", data.mode, true);
+        this.setState("ramp", data.ramp, true);
+        this.setState("power", data.power, true);
     }
     /**
     * Is called if a subscribed state changes
@@ -168,6 +182,7 @@ class MystromWifiBulb extends utils.Adapter {
     onUnload(callback) {
         try {
             this.log.info("cleaned everything up...");
+            this.listener.stop();
             callback();
         }
         catch (e) {

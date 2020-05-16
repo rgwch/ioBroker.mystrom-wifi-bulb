@@ -6,6 +6,7 @@
 // you need to create an adapter
 import * as utils from "@iobroker/adapter-core";
 import fetch from "node-fetch"
+import { BulbListener } from "./listener";
 
 const API = "/api/v1/"
 
@@ -50,6 +51,8 @@ declare global {
 
 class MystromWifiBulb extends utils.Adapter {
   private mac = ""
+  private listener=new BulbListener(this.notify)
+
   public constructor(options: Partial<utils.AdapterOptions> = {}) {
     super({
       ...options,
@@ -99,11 +102,25 @@ class MystromWifiBulb extends utils.Adapter {
         if (this.config.hostip) {
           await this.doPost({ notifyurl: this.config.hostip + `/set/${this.name}.${this.instance}.notify?value%3Dtrue` })
         }
+        const listenerdef=this.config.hostip.split(":")
+        if(listenerdef.length==2){
+          const listenerPort=parseInt(listenerdef[1].trim())
+          this.listener.start(listenerPort)
+        }
         this.setState("info.connection", true, true)
       }
-    }
 
+    }
+  
     this.subscribeStates("*");
+  }
+
+  private notify(data: DeviceInfo): void{
+    this.setState("on",data.on, true)
+    this.setState("color",data.color,true)
+    this.setState("mode",data.mode,true)
+    this.setState("ramp",data.ramp,true)
+    this.setState("power",data.power,true)
   }
 
   /**
@@ -203,6 +220,7 @@ class MystromWifiBulb extends utils.Adapter {
   private onUnload(callback: () => void): void {
     try {
       this.log.info("cleaned everything up...");
+      this.listener.stop()
       callback();
     } catch (e) {
       callback();
