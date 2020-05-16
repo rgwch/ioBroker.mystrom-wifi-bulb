@@ -22,7 +22,7 @@ class MystromWifiBulb extends utils.Adapter {
     constructor(options = {}) {
         super(Object.assign(Object.assign({}, options), { name: "mystrom-wifi-bulb" }));
         this.mac = "";
-        this.listener = new listener_1.BulbListener(json => this.notify(json));
+        this.listener = new listener_1.BulbListener(this.notify.bind(this));
         this.on("ready", this.onReady.bind(this));
         this.on("stateChange", this.onStateChange.bind(this));
         this.on("unload", this.onUnload.bind(this));
@@ -83,11 +83,12 @@ class MystromWifiBulb extends utils.Adapter {
     }
     notify(data) {
         this.log.info("Got notify from bulb: " + JSON.stringify(data));
-        this.setState("on", data.on, true);
-        this.setState("color", data.color, true);
-        this.setState("mode", data.mode, true);
-        this.setState("ramp", data.ramp, true);
-        this.setState("power", data.power, true);
+        const di = data[this.mac];
+        this.setState("on", di.on, true);
+        this.setState("color", di.color, true);
+        this.setState("mode", di.mode, true);
+        this.setState("ramp", di.ramp, true);
+        this.setState("power", di.power, true);
     }
     /**
     * Is called if a subscribed state changes

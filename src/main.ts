@@ -51,7 +51,7 @@ declare global {
 
 class MystromWifiBulb extends utils.Adapter {
   private mac = ""
-  private listener = new BulbListener(json => this.notify(json))
+  private listener = new BulbListener(this.notify.bind(this))
 
   public constructor(options: Partial<utils.AdapterOptions> = {}) {
     super({
@@ -118,13 +118,14 @@ class MystromWifiBulb extends utils.Adapter {
     this.subscribeStates("*");
   }
 
-  private notify(data: DeviceInfo): void {
+  private notify(data: any): void {
     this.log.info("Got notify from bulb: " + JSON.stringify(data))
-    this.setState("on", data.on, true)
-    this.setState("color", data.color, true)
-    this.setState("mode", data.mode, true)
-    this.setState("ramp", data.ramp, true)
-    this.setState("power", data.power, true)
+    const di: DeviceInfo=data[this.mac]
+    this.setState("on", di.on, true)
+    this.setState("color", di.color, true)
+    this.setState("mode", di.mode, true)
+    this.setState("ramp", di.ramp, true)
+    this.setState("power", di.power, true)
   }
 
   /**
@@ -135,7 +136,7 @@ class MystromWifiBulb extends utils.Adapter {
       // The state was changed
       this.log.info(`state ${id} changed: ${state.val} (ack = ${state.ack})`);
       if (!state.ack) {
-
+        
 
       }
     } else {
