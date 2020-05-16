@@ -16,7 +16,6 @@ export class BulbListener {
         })
         req.on("end",()=>{
           const result=JSON.parse(body)
-          console.log(result)
           cb(result)
           res.statusCode=200
           res.end();
@@ -25,8 +24,12 @@ export class BulbListener {
     })
   }
 
-  public start(port: number): void {
-    this.instance.listen(port)
+  public start(port: number): boolean {
+    try{
+      return !!this.instance.listen(port)      
+    }catch(err){
+      return false
+    }
   }
 
   public stop(): void {

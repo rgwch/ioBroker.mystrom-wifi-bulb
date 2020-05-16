@@ -22,7 +22,7 @@ class MystromWifiBulb extends utils.Adapter {
     constructor(options = {}) {
         super(Object.assign(Object.assign({}, options), { name: "mystrom-wifi-bulb" }));
         this.mac = "";
-        this.listener = new listener_1.BulbListener(this.notify);
+        this.listener = new listener_1.BulbListener(json => this.notify(json));
         this.on("ready", this.onReady.bind(this));
         this.on("stateChange", this.onStateChange.bind(this));
         this.on("unload", this.onUnload.bind(this));
@@ -65,12 +65,15 @@ class MystromWifiBulb extends utils.Adapter {
                     this.setState("ramp", di.ramp, true);
                     this.setState("power", di.power, true);
                     if (this.config.hostip) {
-                        yield this.doPost({ notifyurl: this.config.hostip + `/set/${this.name}.${this.instance}.notify?value%3Dtrue` });
+                        yield this.doPost({ notifyurl: this.config.hostip });
                     }
                     const listenerdef = this.config.hostip.split(":");
-                    if (listenerdef.length == 2) {
-                        const listenerPort = parseInt(listenerdef[1].trim());
-                        this.listener.start(listenerPort);
+                    if (listenerdef.length == 3) {
+                        const listenerPort = parseInt(listenerdef[2].trim());
+                        this.log.info("notifyer listening ad port: " + listenerPort);
+                        if (!this.listener.start(listenerPort)) {
+                            this.log.error("Listener failed");
+                        }
                     }
                     this.setState("info.connection", true, true);
                 }
@@ -79,6 +82,7 @@ class MystromWifiBulb extends utils.Adapter {
         });
     }
     notify(data) {
+        this.log.info("Got notify from bulb: " + JSON.stringify(data));
         this.setState("on", data.on, true);
         this.setState("color", data.color, true);
         this.setState("mode", data.mode, true);

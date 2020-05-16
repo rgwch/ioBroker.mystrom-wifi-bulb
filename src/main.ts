@@ -51,7 +51,7 @@ declare global {
 
 class MystromWifiBulb extends utils.Adapter {
   private mac = ""
-  private listener=new BulbListener(this.notify)
+  private listener = new BulbListener(json => this.notify(json))
 
   public constructor(options: Partial<utils.AdapterOptions> = {}) {
     super({
@@ -100,27 +100,31 @@ class MystromWifiBulb extends utils.Adapter {
         this.setState("ramp", di.ramp, true)
         this.setState("power", di.power, true)
         if (this.config.hostip) {
-          await this.doPost({ notifyurl: this.config.hostip + `/set/${this.name}.${this.instance}.notify?value%3Dtrue` })
+          await this.doPost({ notifyurl: this.config.hostip })
         }
-        const listenerdef=this.config.hostip.split(":")
-        if(listenerdef.length==2){
-          const listenerPort=parseInt(listenerdef[1].trim())
-          this.listener.start(listenerPort)
+        const listenerdef = this.config.hostip.split(":")
+        if (listenerdef.length == 3) {
+          const listenerPort = parseInt(listenerdef[2].trim())
+          this.log.info("notifyer listening ad port: " + listenerPort)
+          if (!this.listener.start(listenerPort)) {
+            this.log.error("Listener failed")
+          }
         }
         this.setState("info.connection", true, true)
       }
 
     }
-  
+
     this.subscribeStates("*");
   }
 
-  private notify(data: DeviceInfo): void{
-    this.setState("on",data.on, true)
-    this.setState("color",data.color,true)
-    this.setState("mode",data.mode,true)
-    this.setState("ramp",data.ramp,true)
-    this.setState("power",data.power,true)
+  private notify(data: DeviceInfo): void {
+    this.log.info("Got notify from bulb: " + JSON.stringify(data))
+    this.setState("on", data.on, true)
+    this.setState("color", data.color, true)
+    this.setState("mode", data.mode, true)
+    this.setState("ramp", data.ramp, true)
+    this.setState("power", data.power, true)
   }
 
   /**
