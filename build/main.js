@@ -82,13 +82,19 @@ class MystromWifiBulb extends utils.Adapter {
         });
     }
     notify(data) {
-        this.log.info("Got notify from bulb: " + JSON.stringify(data));
-        const di = data[this.mac];
-        this.setState("on", di.on, true);
-        this.setState("color", di.color, true);
-        this.setState("mode", di.mode, true);
-        this.setState("ramp", di.ramp, true);
-        this.setState("power", di.power, true);
+        return __awaiter(this, void 0, void 0, function* () {
+            this.log.info("Got notify from bulb: " + JSON.stringify(data));
+            const di = data[this.mac];
+            const oldStates = yield this.getStatesAsync("*");
+            console.log(JSON.stringify(oldStates));
+            if (oldStates.on.val != di.on) {
+                this.setState("on", di.on, true);
+            }
+            this.setState("color", di.color, true);
+            this.setState("mode", di.mode, true);
+            this.setState("ramp", di.ramp, true);
+            this.setState("power", di.power, true);
+        });
     }
     /**
     * Is called if a subscribed state changes

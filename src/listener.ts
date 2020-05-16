@@ -1,6 +1,6 @@
 import * as http from "http"
 
-type callback=(json: any) => void
+type callback=(json: any) => Promise<void>
 
 export class BulbListener {
   private instance: http.Server;

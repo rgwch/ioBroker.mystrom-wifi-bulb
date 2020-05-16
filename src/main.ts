@@ -118,10 +118,14 @@ class MystromWifiBulb extends utils.Adapter {
     this.subscribeStates("*");
   }
 
-  private notify(data: any): void {
+  private async notify(data: any): Promise<void> {
     this.log.info("Got notify from bulb: " + JSON.stringify(data))
     const di: DeviceInfo=data[this.mac]
-    this.setState("on", di.on, true)
+    const oldStates=await this.getStatesAsync(this.namespace+".*")
+    console.log(JSON.stringify(oldStates))
+    if(oldStates.on.val!=di.on){
+      this.setState("on", di.on, true)
+    }
     this.setState("color", di.color, true)
     this.setState("mode", di.mode, true)
     this.setState("ramp", di.ramp, true)
@@ -136,7 +140,7 @@ class MystromWifiBulb extends utils.Adapter {
       // The state was changed
       this.log.info(`state ${id} changed: ${state.val} (ack = ${state.ack})`);
       if (!state.ack) {
-        
+
 
       }
     } else {
