@@ -1,6 +1,6 @@
 import * as http from "http"
 
-type callback=(json: any) => Promise<void>
+type callback = (json: any) => Promise<void>
 
 export class BulbListener {
   private instance: http.Server;
@@ -9,15 +9,15 @@ export class BulbListener {
       if (req.method !== "POST") {
         res.statusCode = 403
         res.end()
-      }else{
-        let body=""
-        req.on("data",chunk=>{
-          body+=chunk
+      } else {
+        let body = ""
+        req.on("data", chunk => {
+          body += chunk
         })
-        req.on("end",()=>{
-          const result=JSON.parse(body)
+        req.on("end", () => {
+          const result = JSON.parse(body)
           cb(result)
-          res.statusCode=200
+          res.statusCode = 200
           res.end();
         })
       }
@@ -25,9 +25,9 @@ export class BulbListener {
   }
 
   public start(port: number): boolean {
-    try{
-      return !!this.instance.listen(port)      
-    }catch(err){
+    try {
+      return !!this.instance.listen(port)
+    } catch (err) {
       return false
     }
   }

@@ -118,18 +118,24 @@ class MystromWifiBulb extends utils.Adapter {
     this.subscribeStates("*");
   }
 
+  private async setConditionally(statename: string, act: any): Promise<void> {
+    const vl = act[statename]
+    const full = this.namespace + "." + statename
+    const old = await this.getStateAsync(full)
+    if (old && old.val) {
+      if (old.val != vl) {
+        await this.setStateAsync(full, vl, true)
+      }
+    }
+  }
+
   private async notify(data: any): Promise<void> {
     this.log.info("Got notify from bulb: " + JSON.stringify(data))
-    const di: DeviceInfo=data[this.mac]
-    const oldStates=await this.getStatesAsync(this.namespace+".*")
-    console.log(JSON.stringify(oldStates))
-    if(oldStates.on.val!=di.on){
-      this.setState("on", di.on, true)
-    }
-    this.setState("color", di.color, true)
-    this.setState("mode", di.mode, true)
-    this.setState("ramp", di.ramp, true)
-    this.setState("power", di.power, true)
+    const di = data[this.mac]
+    const states = ["on", "color", "mode", "ramp", "power"]
+    states.forEach(async (st: string) => {
+      await this.setConditionally(st, di)
+    });
   }
 
   /**
@@ -140,7 +146,11 @@ class MystromWifiBulb extends utils.Adapter {
       // The state was changed
       this.log.info(`state ${id} changed: ${state.val} (ack = ${state.ack})`);
       if (!state.ack) {
-
+        if (id.endsWith(".on")) {
+          this.doPost({ action: (state.val ? "on" : "off") })
+        } else {
+          this.doPost({ [id.substr(this.namespace.length)]: state.val })
+        }
 
       }
     } else {

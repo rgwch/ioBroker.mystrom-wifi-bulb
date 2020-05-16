@@ -10,6 +10,10 @@
 
 [![NPM](https://nodei.co/npm/iobroker.mystrom-wifi-bulb.png?downloads=true)](https://nodei.co/npm/iobroker.mystrom-wifi-bulb/)
 
+## What it is
+
+This is an adaptor to connect [MyStrom Wifi Bulbs]() with the [ioBroker]() home automation system.
+
 ## mystrom-wifi-bulb adapter for ioBroker
 
 Control Mystrom lights

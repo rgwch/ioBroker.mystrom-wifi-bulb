@@ -81,19 +81,29 @@ class MystromWifiBulb extends utils.Adapter {
             this.subscribeStates("*");
         });
     }
+    setConditionally(statename, act) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const vl = act[statename];
+            const full = this.namespace + "." + statename;
+            this.log.info("checking " + full + "=> " + vl);
+            const old = yield this.getStateAsync(full);
+            if (old && old.val) {
+                this.log.info("old " + statename + ": " + old.val);
+                if (old.val != vl) {
+                    this.log.info(old.val + "is not equal " + vl);
+                    yield this.setStateAsync(full, vl, true);
+                }
+            }
+        });
+    }
     notify(data) {
         return __awaiter(this, void 0, void 0, function* () {
             this.log.info("Got notify from bulb: " + JSON.stringify(data));
             const di = data[this.mac];
-            const oldStates = yield this.getStatesAsync("*");
-            console.log(JSON.stringify(oldStates));
-            if (oldStates.on.val != di.on) {
-                this.setState("on", di.on, true);
-            }
-            this.setState("color", di.color, true);
-            this.setState("mode", di.mode, true);
-            this.setState("ramp", di.ramp, true);
-            this.setState("power", di.power, true);
+            const states = ["on", "color", "mode", "ramp", "power"];
+            states.forEach((st) => __awaiter(this, void 0, void 0, function* () {
+                yield this.setConditionally(st, di);
+            }));
         });
     }
     /**
