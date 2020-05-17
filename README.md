@@ -23,7 +23,7 @@ When first switched on, the bulb goes in WPS mode for 3 minutes. If you activate
 
 - The MyStrom-Wifi-Bulb should already be active and integrated in the Network. 
 
-### Fetch and install ioBroker.mystrom-wifi-button
+### Fetch and install ioBroker.mystrom-wifi-bulb
 
 This adapter is not part of the official ioBroker distribution. So it will not show up in ioBroker admin's adapter list. You can install it either directly from NPM:
 
