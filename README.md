@@ -37,7 +37,7 @@ Make sure to select "Beliebig" even though it's situated on Github:
 
 ![](doc/bulb_2.jpg)
 
-Find out the release you're interessed in: <https://github.com/rgwch/ioBroker.mystrom-wifi-bulb/releases> and copy/paste the address of the .tar.gz link.
+Find out the release you're interested in: <https://github.com/rgwch/ioBroker.mystrom-wifi-bulb/releases> and copy/paste the address of the .tar.gz link.
 
 Read the warning and click "install" if you agree.
 
