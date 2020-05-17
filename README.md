@@ -54,83 +54,32 @@ After clicking save and close, the instance should appear and turn "green".
 
 ## Use
 
+The MyStrom-Wifi-Bulb adapter No. X (starting with 0) will create the following ioBroker states:
 
-## mystrom-wifi-bulb adapter for ioBroker
+* mystrom-wifi-bulb.X.on  (read/write: switch on/off)
+* mystrom-wifi-bulb.X.ramp (read/write: duration of switching in ms)
+* mystrom-wifi.bulb.X.mode (read only: rgb, hsv or mono)
+* mystrom-wifi.bulb.X.color (read only: color values, depending of mode)
+* mystron-wifi-bulb.X.power (reas only: Power consumption of the bulb in Watt)
 
-Control Mystrom lights
+Note: This version of the adapter is not able to switch colors and color modes programmatically. Any hints on how to do that are welcome :-)
 
-## Developer manual
-This section is intended for the developer. It can be deleted later
+Use the states in ioBroker scripting or VIS UI Design
 
-### Getting started
+Example:
 
-You are almost done, only a few steps left:
-1. Create a new repository on GitHub with the name `ioBroker.mystrom-wifi-bulb`
-1. Initialize the current folder as a new git repository:  
-    ```bash
-    git init
-    git add .
-    git commit -m "Initial commit"
-    ```
-1. Link your local repository with the one on GitHub:  
-    ```bash
-    git remote add origin https://github.com/rgwch/ioBroker.mystrom-wifi-bulb
-    ```
+````javascript
+const bulb1="mystrom-wifi-bulb.0.on"
+const pir="hm-rcp-pir.0.activated"
 
-1. Push all files to the GitHub repo:  
-    ```bash
-    git push origin master
-    ```
-1. Head over to [src/main.ts](src/main.ts) and start programming!
-
-### Best Practices
-We've collected some [best practices](https://github.com/ioBroker/ioBroker.repositories#development-and-coding-best-practices) regarding ioBroker development and coding in general. If you're new to ioBroker or Node.js, you should
-check them out. If you're already experienced, you should also take a look at them - you might learn something new :)
-
-### Scripts in `package.json`
-Several npm scripts are predefined for your convenience. You can run them using `npm run <scriptname>`
-| Script name | Description                                              |
-|-------------|----------------------------------------------------------|
-| `build`    | Re-compile the TypeScript sources.                       |
-| `watch`     | Re-compile the TypeScript sources and watch for changes. |
-| `test:ts`   | Executes the tests you defined in `*.test.ts` files.     |
-| `test:package`    | Ensures your `package.json` and `io-package.json` are valid. |
-| `test:unit`       | Tests the adapter startup with unit tests (fast, but might require module mocks to work). |
-| `test:integration`| Tests the adapter startup with an actual instance of ioBroker. |
-| `test` | Performs a minimal test run on package files and your tests. |
-| `lint` | Runs `ESLint` to check your code for formatting errors and potential bugs. |
-
-### Writing tests
-When done right, testing code is invaluable, because it gives you the 
-confidence to change your code while knowing exactly if and when 
-something breaks. A good read on the topic of test-driven development 
-is https://hackernoon.com/introduction-to-test-driven-development-tdd-61a13bc92d92. 
-Although writing tests before the code might seem strange at first, but it has very 
-clear upsides.
-
-The template provides you with basic tests for the adapter startup and package files.
-It is recommended that you add your own tests into the mix.
-
-### Publishing the adapter
-To get your adapter released in ioBroker, please refer to the documentation 
-of [ioBroker.repositories](https://github.com/ioBroker/ioBroker.repositories#requirements-for-adapter-to-get-added-to-the-latest-repository).
-
-### Test the adapter manually on a local ioBroker installation
-In order to install the adapter locally without publishing, the following steps are recommended:
-1. Create a tarball from your dev directory:  
-    ```bash
-    npm pack
-    ```
-1. Upload the resulting file to your ioBroker host
-1. Install it locally (The paths are different on Windows):
-    ```bash
-    cd /opt/iobroker
-    npm i /path/to/tarball.tgz
-    ```
-
-For later updates, the above procedure is not necessary. Just do the following:
-1. Overwrite the changed files in the adapter directory (`/opt/iobroker/node_modules/iobroker.mystrom-wifi-bulb`)
-1. Execute `iobroker upload mystrom-wifi-bulb` on the ioBroker host
+// Light on for 2 Minutes if infrared sensor is activated
+on({pir.activated},()=>{
+  setState(bulb1,true)
+  setTimeout(()=>{
+    setState(bulb1,false)
+  },120000)
+})
+````
 
 ## Changelog
 
