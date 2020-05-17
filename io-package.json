@@ -1,8 +1,20 @@
 {
   "common": {
     "name": "mystrom-wifi-bulb",
-    "version": "0.1.3",
+    "version": "0.1.4",
     "news": {
+      "0.1.4": {
+        "en": "try to get it into latest repository",
+        "de": "Versuch, es in das 'latest' Repository zu bekommen",
+        "ru": "попробуйте получить его в последнем хранилище",
+        "pt": "tente colocá-lo no repositório 'latest'",
+        "nl": "probeer het in de 'latest' repository te krijgen",
+        "fr": "essayez de le mettre dans le 'latest' référentiel",
+        "it": "prova a inserirlo nell' 'latest' repository",
+        "es": "intenta ingresarlo en el 'latest' repositorio",
+        "pl": "spróbuj dostać się do najnowszego repozytorium",
+        "zh-cn": "尝试将其放入最新的存储库"
+      },
       "0.0.1": {
         "en": "initial release",
         "de": "Erstveröffentlichung",
