@@ -1,4 +1,4 @@
-![Logo](admin/mystrom-wifi-bulb.png)
+![Logo](admin/mystrom-wifi-bulb.jpg)
 # ioBroker.mystrom-wifi-bulb
 
 [![NPM version](http://img.shields.io/npm/v/iobroker.mystrom-wifi-bulb.svg)](https://www.npmjs.com/package/iobroker.mystrom-wifi-bulb)
