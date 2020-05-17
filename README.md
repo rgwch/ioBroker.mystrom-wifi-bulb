@@ -53,7 +53,7 @@ The configuration dialog should open after successful creation of the instance.
 
 Insert the IP Address of the bulb on the left side. Since the bulb need a callback to notify about changes, the IP Address of the ioBroker instance with this adapter must be inserted on the right. The port number is at will, only it must not be used by another service. Here we chose 9004. (If the ioBroker instance runs inside docker, make sure that the port is propagated to the outside, as in the example above)
 
-After clicking save and close, the instance should appear and turn "green".
+After clicking save and close, the instance should appear and turn "green" after a short while.
 
 ## Use
 
