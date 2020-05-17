@@ -19,7 +19,7 @@ When first switched on, the bulb goes in WPS mode for 3 minutes. If you activate
 ### Prerequisites
 
 - A working instance of [ioBroker](http://www.iobroker.net). If you only want a quick test-install, I recommend using [docker](https://www.docker.com/):  
-`docker run -p 8081:8081 -p 8087:8087 -p 8082:8082 -p 9004:9004 --name iobroker -v iobrokerdata:/opt/iobroker buanet/iobroker:latest` (note that you need an otherwise unused port for this mystrom-wifi-bulb adapter, here arbitrarly 9004)
+`docker run -p 8081:8081 -p 8087:8087 -p 8082:8082 -p 9004:9004 --name iobroker -v iobrokerdata:/opt/iobroker buanet/iobroker:latest` (note that you need an unused port for this mystrom-wifi-bulb adapter, here arbitrarly 9004)
 
 - The MyStrom-Wifi-Bulb should already be active and integrated in the Network. 
 
@@ -51,7 +51,7 @@ The configuration dialog should open after successful creation of the instance.
 
 ![](doc/bulb_4.jpg)
 
-Insert the IP Address of the bulb on the left side. Since the bulb need a callback to notify about changes, the IP Address of the ioBroker instance with this adapter must be inserted on the right. The port number is at will, only it must not be used by another service. Here we chose 9004. (If the ioBroker instance runs inside docker, make sure that the port is propagated to the outside, as in the example above)
+Insert the IP Address of the bulb on the left side. Since the bulb need a callback to notify about changes, the IP Address of the ioBroker instance with this adapter must be inserted on the right. The port number is at will, only it must not be used by another service. Here we chose 9004. (If the ioBroker instance runs inside docker, make sure that the port is propagated to the outside, as in the example [above](#prerequisites))
 
 After clicking save and close, the instance should appear and turn "green" after a short while.
 
