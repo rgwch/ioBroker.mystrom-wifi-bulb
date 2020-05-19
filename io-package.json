@@ -64,7 +64,7 @@
     "main": "build/main.js",
     "icon": "mystrom-wifi-bulb.png",
     "enabled": true,
-    "extIcon": "https://raw.githubusercontent.com/rgwch/ioBroker.mystrom-wifi-bulb/master/admin/mystrom-wifi-bulb.jpg",
+    "extIcon": "https://raw.githubusercontent.com/rgwch/ioBroker.mystrom-wifi-bulb/master/admin/mystrom-wifi-bulb.png",
     "readme": "https://github.com/rgwch/ioBroker.mystrom-wifi-bulb/blob/master/README.md",
     "loglevel": "info",
     "mode": "daemon",
