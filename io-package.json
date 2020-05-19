@@ -1,7 +1,7 @@
 {
   "common": {
     "name": "mystrom-wifi-bulb",
-    "version": "0.1.4",
+    "version": "0.1.5",
     "news": {
       "0.1.4": {
         "en": "try to get it into latest repository",
@@ -62,7 +62,7 @@
     "license": "MIT",
     "platform": "Javascript/Node.js",
     "main": "build/main.js",
-    "icon": "mystrom-wifi-bulb.jpg",
+    "icon": "mystrom-wifi-bulb.png",
     "enabled": true,
     "extIcon": "https://raw.githubusercontent.com/rgwch/ioBroker.mystrom-wifi-bulb/master/admin/mystrom-wifi-bulb.jpg",
     "readme": "https://github.com/rgwch/ioBroker.mystrom-wifi-bulb/blob/master/README.md",
