@@ -1,4 +1,4 @@
-![Logo](admin/mystrom-wifi-bulb.jpg)
+![Logo](admin/mystrom-wifi-bulb.png)
 
 [![NPM version](http://img.shields.io/npm/v/iobroker.mystrom-wifi-bulb.svg)](https://www.npmjs.com/package/iobroker.mystrom-wifi-bulb)
 [![Build Status](https://travis-ci.com/rgwch/ioBroker.mystrom-wifi-bulb.svg?branch=master)](https://travis-ci.com/rgwch/ioBroker.mystrom-wifi-bulb)
