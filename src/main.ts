@@ -82,7 +82,7 @@ class MystromWifiBulb extends utils.Adapter {
       await this.createObject("string", "color", true)
       await this.createObject("number", "ramp", true)
       await this.createObject("number", "power", false)
-      await this.createObject("boolean", "notify", false)
+      await this.createObject("string", "notify", false)
       this.setState("info.deviceInfo.mac", gi.mac)
       this.mac = gi.mac
       this.setState("info.deviceInfo.details", JSON.stringify(gi))
@@ -100,8 +100,9 @@ class MystromWifiBulb extends utils.Adapter {
         this.setState("ramp", di.ramp, true)
         this.setState("power", di.power, true)
         if (this.config.hostip) {
-          await this.doPost({ notifyurl: this.config.hostip })
+          await this.doPost({ notifyurl: `${this.config.hostip}/setValueFromBody/${this.namespace}.notify` })
         }
+        /*
         const listenerdef = this.config.hostip.split(":")
         if (listenerdef.length == 3) {
           const listenerPort = parseInt(listenerdef[2].trim())
@@ -110,6 +111,7 @@ class MystromWifiBulb extends utils.Adapter {
             this.log.error("Listener failed")
           }
         }
+        */
         this.setState("info.connection", true, true)
       }
 
@@ -145,7 +147,15 @@ class MystromWifiBulb extends utils.Adapter {
     if (state) {
       // The state was changed
       this.log.info(`state ${id} changed: ${state.val} (ack = ${state.ack})`);
-      if (!state.ack) {
+      if (state.ack) {
+        if (id.endsWith("notify")) {
+          // notify from bulb
+          if (state && state.val) {
+            this.notify(JSON.parse(state.val.toString()))
+          }
+        }
+      } else {
+        // Change from UI
         if (id.endsWith(".on")) {
           this.doPost({ action: (state.val ? "on" : "off") })
         } else {
@@ -176,17 +186,13 @@ class MystromWifiBulb extends utils.Adapter {
 
   private async doPost(body: any): Promise<any> {
     const url = this.config.url + API + "device/" + this.mac
-    /*
-    const encoded = new URLSearchParams()
-    Object.keys(body).forEach(element => {
-      encoded.append(element, body[element])
-    });
-    */
+
     let enc = ""
     Object.keys(body).forEach(el => {
       enc += `${el}=${body[el]}&`
     })
-    this.log.info("POSTing " + url + ":" + enc.substr(0, enc.length - 1))
+    enc = enc.substr(0, enc.length - 1)
+    this.log.info("POSTing " + url + " := " + enc)
 
     try {
       const response = await fetch(url, {
@@ -194,7 +200,7 @@ class MystromWifiBulb extends utils.Adapter {
         headers: {
           "content-type": "application/x-www-form-urlencoded"
         },
-        body: enc.substr(0, enc.length - 1),
+        body: enc,
         redirect: "follow"
       })
       if (response.status !== 200) {
