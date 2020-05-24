@@ -15,16 +15,16 @@ systemDictionary = {
     "zh-cn": "mystrom-wifi-bulb的适配器设置"
   },
   "hostadress": {
-    "en": "Address of ioBroker host",
-    "de": "Adresse des ioBroker Servers",
-    "ru": "IP-адрес хоста ioBroker",
-    "pt": "endereço IP do host ioBroker",
-    "nl": "ip-adres van de ioBroker-host",
-    "fr": "adresse IP de l'hôte ioBroker",
-    "it": "indirizzo IP dell'host ioBroker",
-    "es": "dirección IP del host ioBorker",
-    "pl": "adres IP hosta ioBroker",
-    "zh-cn": "ioBroker主机的IP地址"
+    "en": "Address and port of ioBroker REST-API",
+    "de": "Adresse und Port des ioBroker REST-API",
+    "ru": "Адрес и порт REST-API ioBroker",
+    "pt": "Endereço e porta do ioBroker REST-API",
+    "nl": "Adres en poort van ioBroker REST-API",
+    "fr": "Adresse et port de l'API REST ioBroker",
+    "it": "Indirizzo e porta dell'API REST di ioBroker",
+    "es": "Dirección y puerto de ioBroker REST-API",
+    "pl": "Adres i port interfejsu API REST ioBroker",
+    "zh-cn": "ioBroker REST-API的地址和端口"
   },
   "url": {
     "en": "IP address of the bulb",

@@ -1,8 +1,20 @@
 {
   "common": {
     "name": "mystrom-wifi-bulb",
-    "version": "0.1.5",
+    "version": "0.2.0",
     "news": {
+      "0.2.0": {
+        "en": "use Simple RESTful API for notify calls",
+        "de": "Simple RESTful API für Callbacks verwenden.",
+        "ru": "использовать простой RESTful API для уведомлений о вызовах",
+        "pt": "use a API RESTful simples para notificar chamadas",
+        "nl": "gebruik Simple RESTful API voor meldingen",
+        "fr": "utiliser l'API RESTful simple pour notifier les appels",
+        "it": "utilizzare l'API RESTful semplice per le chiamate di notifica",
+        "es": "use API RESTful simple para notificar llamadas",
+        "pl": "użyj Simple RESTful API do powiadamiania o połączeniach",
+        "zh-cn": "使用简单的RESTful API进行通知调用"
+      },
       "0.1.4": {
         "en": "try to get it into latest repository",
         "de": "Versuch, es in das 'latest' Repository zu bekommen",

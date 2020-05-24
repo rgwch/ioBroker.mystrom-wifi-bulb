@@ -1,12 +1,13 @@
-/*
- * Created with @iobroker/create-adapter v1.24.2
+/**
+ * Connect MyStrom WiFi Bulbs (https://mystrom.ch/de/wifi-bulb/) with ioBroker
+ * Copyright (c) 2020 by G. Weirich
+ * License: See LICENSE
+ *
+ * Adapter templated created with @iobroker/create-adapter v1.24.2
  */
 
-// The adapter-core module gives you access to the core ioBroker functions
-// you need to create an adapter
 import * as utils from "@iobroker/adapter-core";
 import fetch from "node-fetch"
-import { BulbListener } from "./listener";
 
 const API = "/api/v1/"
 
@@ -37,8 +38,7 @@ type GeneralInfo = {
   static: boolean;       // Wether or not the ip address is static
   connected: boolean;   // Wether or not the device is connected to the internet
 }
-// Augment the adapter.config object with the actual types
-// TODO: delete this in the next version
+
 declare global {
   // eslint-disable-next-line @typescript-eslint/no-namespace
   namespace ioBroker {
@@ -51,7 +51,6 @@ declare global {
 
 class MystromWifiBulb extends utils.Adapter {
   private mac = ""
-  private listener = new BulbListener(this.notify.bind(this))
 
   public constructor(options: Partial<utils.AdapterOptions> = {}) {
     super({
@@ -77,15 +76,19 @@ class MystromWifiBulb extends utils.Adapter {
       if (gi.type != "102") {
         this.log.warn("unsupported device type " + gi.type)
       }
-      await this.createObject("boolean", "on", true)
-      await this.createObject("string", "mode", true)
-      await this.createObject("string", "color", true)
-      await this.createObject("number", "ramp", true)
-      await this.createObject("number", "power", false)
-      await this.createObject("string", "notify", false)
+      // if we could connect and it's indeed a mystrom wifi bulb, setup Objects
+      await this.createObject("boolean", "on", true)    // on/off state
+      await this.createObject("string", "mode", true)   // mono, rgb or hsv
+      await this.createObject("string", "color", true)  // depending on mode
+      await this.createObject("number", "ramp", true)   // Time for on/off cycle
+      await this.createObject("number", "power", false) // Consumed power in watts
+      await this.createObject("string", "notify", false) // bulb will set this when changed from other controllers
+
       this.setState("info.deviceInfo.mac", gi.mac)
       this.mac = gi.mac
       this.setState("info.deviceInfo.details", JSON.stringify(gi))
+
+      // Fetch current settings and initialize states accordingly
       const dir = await this.doFetch("device")
       if (!dir) {
         this.log.error("could not get device info")
@@ -99,19 +102,12 @@ class MystromWifiBulb extends utils.Adapter {
         this.setState("color", di.color, true)
         this.setState("ramp", di.ramp, true)
         this.setState("power", di.power, true)
+        // Set callback address for the bulb to our "notify" state. Bulb will POST device info
+        // to this address on every change.
         if (this.config.hostip) {
           await this.doPost({ notifyurl: `${this.config.hostip}/setValueFromBody/${this.namespace}.notify` })
         }
-        /*
-        const listenerdef = this.config.hostip.split(":")
-        if (listenerdef.length == 3) {
-          const listenerPort = parseInt(listenerdef[2].trim())
-          this.log.info("notifyer listening ad port: " + listenerPort)
-          if (!this.listener.start(listenerPort)) {
-            this.log.error("Listener failed")
-          }
-        }
-        */
+        // set connection indicator to "green"
         this.setState("info.connection", true, true)
       }
 
@@ -120,6 +116,7 @@ class MystromWifiBulb extends utils.Adapter {
     this.subscribeStates("*");
   }
 
+  // Helper to set a state only of it's changed
   private async setConditionally(statename: string, act: any): Promise<void> {
     const vl = act[statename]
     const full = this.namespace + "." + statename
@@ -131,9 +128,13 @@ class MystromWifiBulb extends utils.Adapter {
     }
   }
 
+  /*
+    This is called when the bulb POSTed to the notify url
+    We get a DeviceInfo structure and set the states accordingly.
+   */
   private async notify(data: any): Promise<void> {
-    this.log.info("Got notify from bulb: " + JSON.stringify(data))
-    const di = data[this.mac]
+    this.log.debug("Got notify from bulb: " + JSON.stringify(data))
+    const di: DeviceInfo = data[this.mac]
     const states = ["on", "color", "mode", "ramp", "power"]
     states.forEach(async (st: string) => {
       await this.setConditionally(st, di)
@@ -141,24 +142,23 @@ class MystromWifiBulb extends utils.Adapter {
   }
 
   /**
-  * Is called if a subscribed state changes
+  * Is called if a subscribed state changes, or if the bulb POSTed to the notify URL
   */
   private onStateChange(id: string, state: ioBroker.State | null | undefined): void {
     if (state) {
       // The state was changed
-      this.log.info(`state ${id} changed: ${state.val} (ack = ${state.ack})`);
-      if (state.ack) {
-        if (id.endsWith("notify")) {
+      this.log.debug(`state ${id} changed: ${state.val} (ack = ${state.ack})`);
+      if (!state.ack) {
+        // Change On/Off from UI
+        if (id.endsWith(".on")) {
+          this.doPost({ action: (state.val ? "on" : "off") })
+        } else if (id.endsWith("notify")) {
           // notify from bulb
           if (state && state.val) {
             this.notify(JSON.parse(state.val.toString()))
           }
-        }
-      } else {
-        // Change from UI
-        if (id.endsWith(".on")) {
-          this.doPost({ action: (state.val ? "on" : "off") })
         } else {
+          // Other change from UI
           this.doPost({ [id.substr(this.namespace.length)]: state.val })
         }
 
@@ -170,6 +170,7 @@ class MystromWifiBulb extends utils.Adapter {
   }
 
 
+  // Helper to create an ioBroker Object
   private async createObject(type: "string" | "boolean" | "number", name: string, writeable: boolean): Promise<void> {
     await this.setObjectAsync(name, {
       type: "state",
@@ -184,6 +185,7 @@ class MystromWifiBulb extends utils.Adapter {
     })
   }
 
+  // Helper to POST data 
   private async doPost(body: any): Promise<any> {
     const url = this.config.url + API + "device/" + this.mac
 
@@ -245,7 +247,6 @@ class MystromWifiBulb extends utils.Adapter {
   private onUnload(callback: () => void): void {
     try {
       this.log.info("cleaned everything up...");
-      this.listener.stop()
       callback();
     } catch (e) {
       callback();

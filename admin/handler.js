@@ -1,21 +1,22 @@
+/**
+ * Load and save- handlers for the Admin Settings UI (index_m.html)
+ */
+
 // This will be called by the admin adapter when the settings page loads
 function load(settings, onChange) {
-  // example: select elements with id=key and class=value and insert value
+  // select checkbox and text elements with class=value, insert value from settings
+  // and add 'change' handler to notify UI's "save" button
   if (!settings) return;
   $('.value').each(function () {
     var $key = $(this);
     var id = $key.attr('id');
     if ($key.attr('type') === 'checkbox') {
-      // do not call onChange direct, because onChange could expect some arguments
       $key.prop('checked', settings[id])
         .on('change', () => onChange())
-        ;
     } else {
-      // do not call onChange direct, because onChange could expect some arguments
       $key.val(settings[id])
         .on('change', () => onChange())
         .on('keyup', () => onChange())
-        ;
     }
   });
   onChange(false);
@@ -25,7 +26,7 @@ function load(settings, onChange) {
 
 // This will be called by the admin adapter when the user presses the save button
 function save(callback) {
-  // example: select elements with class=value and build settings object
+  // eselect checkbox and text elements with class=value and build settings object
   var obj = {};
   $('.value').each(function () {
     var $this = $(this);
@@ -35,6 +36,7 @@ function save(callback) {
       obj[$this.attr('id')] = $this.val();
     }
   });
+  // standardize URL Inputs (always prepended with protocol) 
   if (obj.url.indexOf("://") == -1) {
     obj.url = "http://" + obj.url
   }
