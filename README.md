@@ -53,7 +53,7 @@ The configuration dialog should open after successful creation of the instance.
 
 ![](doc/bulb_4.jpg)
 
-Insert the IP Address of the bulb on the left side. Since the bulb need a callback to notify about changes, you need also to indicate the address of the ioBroker server and the port you've set when configuring the "Simple RESTful" Adapter. By default, that's 8087. The symbolic network name of the ioBroker Server, e.g. `http://homecontrol.local:8087` will probably not work, so better find out the IP address, e.g. in the router's network list (And while you're there, you'll probably want to instruct the DHCP server to always give the same address to the Dingz and to the ioBroker server.)
+Insert the IP Address of the bulb on the left side. Since the bulb need a callback to notify about changes, you need also to indicate the address of the ioBroker server and the port you've set when configuring the "Simple RESTful" Adapter. By default, that's 8087. The symbolic network name of the ioBroker Server, e.g. `http://homecontrol.local:8087` will probably not work, so better find out the IP address, e.g. in the router's network list (And while you're there, you'll probably want to instruct the DHCP server to always give the same address to the Bulb and to the ioBroker server.)
 
 After clicking save and close, the instance should appear and turn "green" after a short while.
 
