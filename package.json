@@ -1,6 +1,6 @@
 {
   "name": "iobroker.mystrom-wifi-bulb",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "description": "Control Mystrom lights",
   "author": {
     "name": "rgwch",

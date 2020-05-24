@@ -88,6 +88,9 @@ on({id: pir},()=>{
 
 ## Changelog
 
+### 0.2.1
+* (rgwch) Use now Simple RESTful API Adapter for callbacks from the bulb.
+
 ### 0.1.3
 * (rgwch) initial release
 
