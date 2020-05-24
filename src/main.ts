@@ -117,11 +117,12 @@ class MystromWifiBulb extends utils.Adapter {
   }
 
   // Helper to set a state only of it's changed
-  private async setConditionally(statename: string, act: any): Promise<void> {
+  private async setConditionally(statename: "on" | "color" | "mode" | "ramp" | "power", act: DeviceInfo): Promise<void> {
     const vl = act[statename]
     const full = this.namespace + "." + statename
     const old = await this.getStateAsync(full)
-    if (old && old.val) {
+    this.log.info("SetState " + full + " from " + old?.val + " to " + vl)
+    if (old) {
       if (old.val != vl) {
         await this.setStateAsync(full, vl, true)
       }
@@ -136,8 +137,8 @@ class MystromWifiBulb extends utils.Adapter {
     this.log.debug("Got notify from bulb: " + JSON.stringify(data))
     const di: DeviceInfo = data[this.mac]
     const states = ["on", "color", "mode", "ramp", "power"]
-    states.forEach(async (st: string) => {
-      await this.setConditionally(st, di)
+    states.forEach(async st => {
+      await this.setConditionally(st as any, di)
     });
   }
 

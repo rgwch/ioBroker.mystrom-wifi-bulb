@@ -84,7 +84,8 @@ class MystromWifiBulb extends utils.Adapter {
             const vl = act[statename];
             const full = this.namespace + "." + statename;
             const old = yield this.getStateAsync(full);
-            if (old && old.val) {
+            this.log.info("SetState " + full + " from " + (old === null || old === void 0 ? void 0 : old.val) + " to " + vl);
+            if (old) {
                 if (old.val != vl) {
                     yield this.setStateAsync(full, vl, true);
                 }
@@ -97,7 +98,7 @@ class MystromWifiBulb extends utils.Adapter {
      */
     notify(data) {
         return __awaiter(this, void 0, void 0, function* () {
-            this.log.info("Got notify from bulb: " + JSON.stringify(data));
+            this.log.debug("Got notify from bulb: " + JSON.stringify(data));
             const di = data[this.mac];
             const states = ["on", "color", "mode", "ramp", "power"];
             states.forEach((st) => __awaiter(this, void 0, void 0, function* () {
@@ -111,7 +112,7 @@ class MystromWifiBulb extends utils.Adapter {
     onStateChange(id, state) {
         if (state) {
             // The state was changed
-            this.log.info(`state ${id} changed: ${state.val} (ack = ${state.ack})`);
+            this.log.debug(`state ${id} changed: ${state.val} (ack = ${state.ack})`);
             if (!state.ack) {
                 // Change On/Off from UI
                 if (id.endsWith(".on")) {
